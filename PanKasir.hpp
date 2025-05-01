@@ -1,0 +1,35 @@
+#ifndef PANKASIR_HPP
+#define PANKASIR_HPP
+
+#include <string>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+struct Item
+{
+    int id;
+    string nama;
+    unsigned int jumlah;
+    unsigned int harga;
+    float diskon = 0;
+};
+
+class PanKasir
+{
+protected:
+    const int totalWidth = 49;
+    vector<Item> listBarang;
+
+    vector<string> listError;
+    string formatRupiah(int harga);
+    string strTrunc(string, int);
+    void strUpper(string &str);
+
+public:
+    PanKasir();
+    ~PanKasir();
+};
+
+#endif

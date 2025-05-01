@@ -1,39 +1,21 @@
-#include <iostream>
-#include <string>
-#include <vector>
-#include <algorithm>
+#include <PanKasir.hpp>
 
-using namespace std;
+PanKasir::PanKasir() {}
 
-struct Item {
-    int id;
-    string nama;
-    int unsigned jumlah;
-    int unsigned harga;
-    float diskon = 0;
-};
+PanKasir::~PanKasir() {}
 
-class TubesKasir {
-    protected:
-        const int totalWidth = 49;
-        vector<Item> listBarang;
+void PanKasir::strUpper(string &str) {
+    transform(str.begin(), str.end(), str.begin(), ::toupper);
+}
 
-        vector<string> listError;
-        string formatRupiah(int harga);
-        string strTrunc(string, int);
-        void strUpper(string &str) { transform(str.begin(), str.end(), str.begin(), ::toupper); }
-    public:
-        TubesKasir() {}
-        ~TubesKasir() {}
-};
-string TubesKasir::formatRupiah(int harga) {
+string PanKasir::formatRupiah(int harga) {
     string hrgStr = to_string(harga);
 
     for (int i = hrgStr.length() - 3; i > 0; i-=3 )
         hrgStr.insert(i, ".");
     return "Rp" + hrgStr;
 }
-string TubesKasir::strTrunc(string str, int len) {
+string PanKasir::strTrunc(string str, int len) {
     if (str.length() > len) {
         return str.substr(0, len - 3) + "...";
     } else {
