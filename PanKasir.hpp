@@ -7,6 +7,13 @@
 
 using namespace std;
 
+#define INFO "|i| "
+#define ERR "|x| "
+#define WARN "|!| "
+#define RES "|~| "
+#define SUCC "|✓| "
+#define ASK "|?| "
+
 struct Item
 {
     int id;
@@ -15,6 +22,14 @@ struct Item
     unsigned int harga;
     float diskon = 0;
 };
+struct ItemNoId
+{
+    std::string nama;
+    unsigned int jumlah;
+    unsigned int harga;
+    float diskon = 0;
+};
+
 
 class PanKasir
 {
