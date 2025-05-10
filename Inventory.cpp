@@ -1,4 +1,4 @@
-#include <Inventory.hpp>
+#include "Inventory.hpp"
 
 
 Inventory::Inventory() {
@@ -15,11 +15,12 @@ Inventory::~Inventory() {
 void Inventory::loadFileBarang() {
     fileBarang.open(dirCetakan + namaFile);
     if (!fileBarang.is_open()) {
-        cerr << ERR "ERR (Inventory::loadFileBarang): Failed to open file." << endl;
+        cerr << ERR "ERR (Inventory::loadFileBarang): Failed to open file.\n";
         return;
     }
     Item brg;
     string line;
+    listBarang.clear();
     
     while (getline(fileBarang, line)) {
         stringstream ss(line);
@@ -50,7 +51,7 @@ void Inventory::loadFileBarang() {
 void Inventory::saveFileBarang() {
     fileCetakBarang.open(dirCetakan + namaFile);
     if (!fileCetakBarang.is_open()) {
-        cerr << ERR "ERR (Inventory::saveFileBarang): Failed to open file." << endl;
+        cerr << ERR "ERR (Inventory::saveFileBarang): Failed to open file.\n";
         return;
     }
     for (auto i = listBarang.begin(); i != listBarang.end(); ++i) {
@@ -61,28 +62,33 @@ void Inventory::saveFileBarang() {
 
 void Inventory::tambahBarang(ItemNoId brg) {
     int lastId = listBarang.empty() ? 0 : listBarang.back().id;
-    listBarang.push_back({++lastId, brg.nama, brg.jumlah, brg.harga, brg.diskon});
+    auto it = find_if(listBarang.begin(), listBarang.end(), [this, brg](Item &br) { return toUpperCopy(br.nama) == toUpperCopy(brg.nama); });
+    if (it != listBarang.end())
+        editBarang(it->id, brg);
+    else
+        listBarang.push_back({++lastId, brg.nama, brg.jumlah, brg.harga, brg.diskon});
 }
 void Inventory::tambahBarang(string namaBrg, unsigned int jlhBrg, unsigned int hargaBrg, float diskon) {
     tambahBarang({namaBrg, jlhBrg, hargaBrg, diskon});
 }
 
-void Inventory::hapusBarang(int id) {
+bool Inventory::hapusBarang(int id) {
     auto it = find_if(listBarang.begin(), listBarang.end(), [id](Item &brg) { return brg.id == id; });
     if (it != listBarang.end()) {
         listBarang.erase(it);
-        cout << SUCC "Barang dengan ID " << id << " telah dihapus." << endl;
+        return true;
     } else {
-        cerr << ERR "ERR (Inventory::hapusBarang): Item not found." << endl;
+        cerr << ERR "ERR (Inventory::hapusBarang): Item not found.\n";
+        return false;
     }
 }
-void Inventory::hapusBarang() {
-    string idStr;
-    cout << ASK "Masukkan ID barang yang ingin dihapus: ";
-    getline(cin, idStr);
-    int id = stoi(idStr);
-    hapusBarang(id);
-}
+// void Inventory::hapusBarang() {
+//     string idStr;
+//     cout << ASK "Masukkan ID barang yang ingin dihapus: ";
+//     getline(cin, idStr);
+//     int id = stoi(idStr);
+//     hapusBarang(id);
+// }
 
 void Inventory::editBarang(int id, ItemNoId brg) {
     auto it = find_if(listBarang.begin(), listBarang.end(), [id](Item &item) { return item.id == id; });
@@ -90,70 +96,95 @@ void Inventory::editBarang(int id, ItemNoId brg) {
         if (brg.nama.empty()) brg.nama = it->nama;
         if (brg.jumlah == 0) brg.jumlah = it->jumlah;
         if (brg.harga == 0) brg.harga = it->harga;
-        if (brg.diskon == 0) brg.diskon = it->diskon;
+        if (brg.diskon == -1) brg.diskon = it->diskon;
         *it = {id, brg.nama, brg.jumlah, brg.harga, brg.diskon};
-        cout << SUCC "Barang dengan ID " << id << " telah diedit." << endl;
     } else {
-        cerr << ERR "ERR (Inventory::editBarang): Item not found." << endl;
+        cerr << ERR "ERR (Inventory::editBarang): Item not found.\n";
     }
 }
 void Inventory::editBarang(int id, string namaBrg, unsigned int jlhBrg, unsigned int hargaBrg, float diskon) {
     editBarang(id, {namaBrg, jlhBrg, hargaBrg, diskon});
 }
-void Inventory::editBarang() {
-    string idStr;
-    cout << ASK "Masukkan ID barang yang ingin diedit: ";
-    getline(cin, idStr);
-    int id = stoi(idStr);
+// void Inventory::editBarang() {
+//     string idStr;
+//     cout << ASK "Masukkan ID barang yang ingin diedit: ";
+//     getline(cin, idStr);
+//     int id = stoi(idStr);
 
-    auto it = find_if(listBarang.begin(), listBarang.end(), [id](Item &item) { return item.id == id; });
-    if (it == listBarang.end()) {
-        cerr << ERR "ERR (Inventory::editBarang): Item not found." << endl;
-        return;
-    }
+//     auto it = find_if(listBarang.begin(), listBarang.end(), [id](Item &item) { return item.id == id; });
+//     if (it == listBarang.end()) {
+//         cerr << ERR "ERR (Inventory::editBarang): Item not found.\n";
+//         return;
+//     }
 
-    ItemNoId brg;
-    cout << ASK "Masukkan nama barang baru (kosongkan jika tidak ingin mengubah): ";
-    getline(cin, brg.nama);
-    cout << ASK "Masukkan jumlah barang baru (0 jika tidak ingin mengubah): ";
-    cin >> brg.jumlah;
-    cout << ASK "Masukkan harga barang baru (0 jika tidak ingin mengubah): ";
-    cin >> brg.harga;
-    cout << ASK "Masukkan diskon barang baru (0 jika tidak ingin mengubah): ";
-    cin >> brg.diskon;
+//     ItemNoId brg;
+//     cout << ASK "Masukkan nama barang baru (kosongkan jika tidak ingin mengubah): ";
+//     getline(cin, brg.nama);
+//     cout << ASK "Masukkan jumlah barang baru (0 jika tidak ingin mengubah): ";
+//     cin >> brg.jumlah;
+//     cout << ASK "Masukkan harga barang baru (0 jika tidak ingin mengubah): ";
+//     cin >> brg.harga;
+//     cout << ASK "Masukkan diskon barang baru (0 jika tidak ingin mengubah): ";
+//     cin >> brg.diskon;
 
-    editBarang(id, brg);
-}
+//     editBarang(id, brg);
+// }
 
 void Inventory::cetakListBarang() {
-    cout << "╔═══════════════════════════════════════════════════╗" << endl;
-    cout << "║ ID  NAMA BARANG                 STOK        HARGA ║" << endl;
-    cout << "╠═══════════════════════════════════════════════════╣" << endl;
+    cout << "╔═══════════════════════════════════════════════════╗\n";
+    cout << "║ ID  NAMA BARANG                 STOK        HARGA ║\n";
+    cout << "╠═══════════════════════════════════════════════════╣\n";
     for (const auto& item : listBarang) {
         cout << "║ " << left << setw(3) << item.id
              << left << setw(25) << item.nama
              << right << setw(8) << item.jumlah
              << right << setw(13) << item.harga
-             << " ║" << endl;
+             << " ║\n";
     }
-    cout << "╚═══════════════════════════════════════════════════╝" << endl;
+    cout << "╚═══════════════════════════════════════════════════╝\n";
+}
+void Inventory::cetakListBarang(vector<Item> barangs) {
+    cout << "╔═══════════════════════════════════════════════════╗\n";
+    cout << "║ ID  NAMA BARANG                 STOK        HARGA ║\n";
+    cout << "╠═══════════════════════════════════════════════════╣\n";
+    for (const auto& item : barangs) {
+        cout << "║ " << left << setw(3) << item.id
+             << left << setw(25) << item.nama
+             << right << setw(8) << item.jumlah
+             << right << setw(13) << item.harga
+             << " ║\n";
+    }
+    cout << "╚═══════════════════════════════════════════════════╝\n";
+}
+void Inventory::cetakListDiskon(vector<Item> barangs) {
+    cout << "╔═══════════════════════════════════════════════════╗\n";
+    cout << "║ ID  NAMA BARANG               DISKON        HARGA ║\n";
+    cout << "╠═══════════════════════════════════════════════════╣\n";
+    for (const auto& item : barangs) {
+        cout << "║ " << left << setw(3) << item.id
+             << left << setw(25) << item.nama
+             << right << setw(8) << to_string((int) (item.diskon*100)) + "%"
+             << right << setw(13) << item.harga
+             << " ║\n";
+    }
+    cout << "╚═══════════════════════════════════════════════════╝\n";
 }
 
 void Inventory::tampilkanBarang(int id) {
     auto it = find_if(listBarang.begin(), listBarang.end(), [id](Item &item) { return item.id == id; });
     if (it != listBarang.end()) {
-        cout << SUCC << "Barang dengan ID " << id << " ditemukan." << endl;
+        cout << SUCC << "Barang dengan ID " << id << " ditemukan.\n";
         cout << RES << "ID: " << it->id << ", Nama: " << it->nama
              << ", Stok: " << it->jumlah << ", Harga: " << it->harga
              << ", Diskon: " << (it->diskon * 100) << '%' << endl;
     } else {
-        cerr << ERR "ERR (Inventory::tampilkanBarang): Item not found." << endl;
+        cerr << ERR "ERR (Inventory::tampilkanBarang): Item not found.\n";
     }
 }
-void Inventory::tampilkanBarang() {
-    string idStr;
-    cout << ASK "Masukkan ID barang yang ingin ditampilkan: ";
-    getline(cin, idStr);
-    int id = stoi(idStr);
-    tampilkanBarang(id);
-}
+// void Inventory::tampilkanBarang() {
+//     string idStr;
+//     cout << ASK "Masukkan ID barang yang ingin ditampilkan: ";
+//     getline(cin, idStr);
+//     int id = stoi(idStr);
+//     tampilkanBarang(id);
+// }

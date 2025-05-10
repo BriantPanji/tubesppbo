@@ -1,6 +1,7 @@
 #ifndef PANKASIR_HPP
 #define PANKASIR_HPP
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -41,6 +42,7 @@ protected:
     string formatRupiah(int harga);
     string strTrunc(string, int);
     void strUpper(string &str);
+    string toUpperCopy(const string &str);
 
 public:
     PanKasir();

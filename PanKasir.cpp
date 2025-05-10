@@ -1,11 +1,23 @@
-#include <PanKasir.hpp>
+#include "PanKasir.hpp"
 
 PanKasir::PanKasir() {}
 
-PanKasir::~PanKasir() {}
+PanKasir::~PanKasir() {
+    if (listError.empty()) return;
+    cerr << endl << "Error & Warn: " << endl;
+    for (auto &err : listError) {
+        cerr << " - " << err << endl;
+    }
+}
 
 void PanKasir::strUpper(string &str) {
     transform(str.begin(), str.end(), str.begin(), ::toupper);
+}
+
+string PanKasir::toUpperCopy(const string &str) {
+    string upperStr = str;
+    transform(upperStr.begin(), upperStr.end(), upperStr.begin(), ::toupper);
+    return upperStr;
 }
 
 string PanKasir::formatRupiah(int harga) {

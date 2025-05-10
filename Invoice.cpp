@@ -21,10 +21,7 @@ Invoice::Invoice() {
     if (!filesystem::exists(dirCetakan)) {
         filesystem::create_directories(dirCetakan);
     }
-    fileCetakBon.open(dirCetakan + namaFile + "_bon.txt");
 
-    Inventory inv;
-    listBarang = inv.getListBarang();
     namaToko = "Toko Mipo";
     totalBayar = 0;
     pajak = 11;
@@ -36,12 +33,8 @@ Invoice::Invoice() {
 
 Invoice::~Invoice() {
     fileCetakBon.close();
-    if (listError.empty()) return;
-    cerr << endl << "Error & Warn: " << endl;
-    for (auto &err : listError) {
-        cerr << " - " << err << endl;
-    }
 }
+
 
 string Invoice::getWaktu() {
     ostringstream oss;
@@ -55,38 +48,60 @@ string Invoice::getWaktu() {
     return oss.str();
 }
 
-void Invoice::printTeks(string teks) {
-    int textLength = teks.length();
+void Invoice::printBorder(char type, bool cetakFile = true) {
+    switch (type) {
+        case 'h':
+            (cetakFile ? fileCetakBon : cout) << "╔═══════════════════════════════════════════════════╗\n";
+            break;
+        case 'b':
+            (cetakFile ? fileCetakBon : cout) << "╠═══════════════════════════════════════════════════╣\n";
+            break;
+        case 'f':
+            (cetakFile ? fileCetakBon : cout) << "╚═══════════════════════════════════════════════════╝\n";
+            break;
+        default:
+            listError.push_back("ERR (Invoice::printBorder): Invalid border type.");
+            break;
+    }
+}
+
+void Invoice::printTeksTanya(string teks) {
+    cout << "║ " << teks;
+}
+
+void Invoice::printTeks(string teks, bool cetakFile = true) {
     teks = strTrunc(teks, totalWidth);
+    int textLength = teks.length();
     int padding = ((totalWidth - textLength) / 2) + 1;
     int extra = (totalWidth - textLength) % 2;
 
-    fileCetakBon << "║"
+    (cetakFile ? fileCetakBon : cout) << "║"
                  << string(padding, ' ')
                  << teks
                  << string(padding + extra, ' ')
-                 << "║" << endl;
+                 << "║\n";
 }
 
-void Invoice::printTeks(string teks1, string teks2) {
-    teks1 = strTrunc(teks1, (totalWidth / 2) + 1);
-    teks2 = strTrunc(teks2, totalWidth / 2);
-    fileCetakBon << "║ " << left << setw((totalWidth / 2) + 1) << teks1
-                 << right << setw(totalWidth / 2) << teks2
-                 << " ║" << endl;
+void Invoice::printTeks(string teks1, string teks2, bool cetakFile = true) {
+    bool isOneOnly = teks2 == " ";
+    teks1 = strTrunc(teks1, (isOneOnly ? totalWidth - 2 : (totalWidth / 2) + 1));
+    teks2 = strTrunc(teks2, (isOneOnly ? 2 : totalWidth / 2));
+    (cetakFile ? fileCetakBon : cout) << "║ " << left << setw(isOneOnly ? totalWidth-2 : (totalWidth / 2) + 1) << teks1
+                 << right << setw(isOneOnly ? 2 : totalWidth / 2) << teks2
+                 << " ║\n";
 }
 
-void Invoice::printTeksHarga(string teks1, string teks2, string teks3) {
+void Invoice::printTeksHarga(string teks1, string teks2, string teks3, bool cetakFile = true) {
     teks1 = strTrunc(teks1, (totalWidth / 3) + 1);
     teks2 = strTrunc(teks2, (totalWidth / 3) - 1);
     teks3 = strTrunc(teks3, (totalWidth / 3));
-    fileCetakBon << "║ " << left << setw((totalWidth / 3) + 1) << setfill('.') << teks1
+    (cetakFile ? fileCetakBon : cout) << "║ " << left << setw((totalWidth / 3) + 1) << setfill('.') << teks1
                  << right << setw((totalWidth / 3)) << teks2
                  << right << setw(totalWidth / 3) << teks3 << setfill(' ')
-                 << " ║" << endl;
+                 << " ║\n";
 }
 
-void Invoice::printTeksSisi(string teks, char side) {
+void Invoice::printTeksSisi(string teks, char side = 'l', bool cetakFile = true) {
     if (teks.length() > totalWidth) {
         listError.push_back("WARN (Invoice::printTeksSisi): Text is too long.");
         teks = strTrunc(teks, totalWidth);
@@ -95,70 +110,225 @@ void Invoice::printTeksSisi(string teks, char side) {
         listError.push_back("ERR (Invoice::printTeksSisi): Invalid side param.");
         side = 'l';
     }
-    fileCetakBon << "║ " << (side == 'l' ? left : right) << setw(totalWidth) << teks << " ║" << endl;
+    (cetakFile ? fileCetakBon : cout) << "║ " << (side == 'l' ? left : right) << setw(totalWidth) << teks << " ║\n";
 }
 
-void Invoice::printHeader() {
-    fileCetakBon << "╔═══════════════════════════════════════════════════╗" << endl;
+void Invoice::printHeader(bool cetakFile = true) {
+    printBorder('h', cetakFile);
     printTeks(namaToko);
-    fileCetakBon << "╠═══════════════════════════════════════════════════╣" << endl;
-    fileCetakBon << "╠═══════════════════════════════════════════════════╣" << endl;
+    printBorder('b', cetakFile);
+    printBorder('b', cetakFile);
     printTeks(namaFile, getWaktu());
     printTeks("  ");
-    printTeksSisi("Alamat:    " + alamatToko);
-    printTeksSisi("No. Telp:  " + noTelpToko);
-    printTeksSisi("Kasir:     " + namaKasir);
-    fileCetakBon << "╠═══════════════════════════════════════════════════╣" << endl;
-    fileCetakBon << "╠═══════════════════════════════════════════════════╣" << endl;
+    printTeksSisi("Alamat   : " + alamatToko);
+    printTeksSisi("No. Telp : " + noTelpToko);
+    printTeksSisi("Kasir    : " + namaKasir);
+    printBorder('b', cetakFile);
+    printBorder('b', cetakFile);
 }
 
-void Invoice::printFooter() {
-    fileCetakBon << "╠═══════════════════════════════════════════════════╣" << endl;
-    fileCetakBon << "╠═══════════════════════════════════════════════════╣" << endl;
+void Invoice::printFooter(bool cetakFile = true) {
+    printBorder('b', cetakFile);
+    printBorder('b', cetakFile);
     printTeks("TERIMA KASIH ATAS KUNJUNGAN ANDA");
     printTeks("SILAHKAN DATANG KEMBALI");
-    fileCetakBon << "╚═══════════════════════════════════════════════════╝" << endl;
+    printBorder('f', cetakFile);
 }
 
-void Invoice::tambahBarang(ItemNoId brg) {
-    listBelian.push_back({brg.nama, brg.jumlah, brg.harga, brg.diskon});
+void Invoice::tambahBelian(int id, unsigned int jumlah) {
+    auto it = find_if(listBarang.begin(), listBarang.end(), [id](Item &item) { return item.id == id; });
+    if (it != listBarang.end()) {
+        auto ite = find_if(listBelian.begin(), listBelian.end(), [it](Belian &item) { return item.id == it->id; });
+        if (ite != listBelian.end()) {
+            if (ite->jumlah + jumlah > it->jumlah)
+                ite->jumlah = it->jumlah;
+            else
+                ite->jumlah += jumlah;
+        }
+        else
+            listBelian.push_back({it->id, jumlah == 0 ? 1 : jumlah  });
+    } else {
+        listError.push_back("ERR (Invoice::tambahBelian): Item not found.");
+    }
 }
-void Invoice::tambahBarang(string namaBrg, unsigned int jlhBrg, unsigned int hargaBrg, float diskon) {
-    tambahBarang({namaBrg, jlhBrg, hargaBrg, diskon});
+void Invoice::tambahBelian(Belian belian) {
+    tambahBelian(belian.id, belian.jumlah);
+}
+void Invoice::editBelian(int id, unsigned int jumlah) {
+    auto it = find_if(listBelian.begin(), listBelian.end(), [id](const Belian &belian) { return belian.id == id; });
+    if (it != listBelian.end()) {
+        it->jumlah = jumlah;
+    } else {
+        listError.push_back("ERR (Invoice::editBelian): Item not found.");
+    }
+}
+void Invoice::hapusBelian(int id) {
+    auto it = find_if(listBelian.begin(), listBelian.end(), [id](const Belian &belian) { return belian.id == id; });
+    if (it != listBelian.end()) {
+        listBelian.erase(it);
+    } else {
+        listError.push_back("ERR (Invoice::hapusBelian): Item not found.");
+    }
 }
 
-void Invoice::printIsi() {
+void Invoice::printIsi(bool cetakFile = true) {
     int totalHarga = 0;
 
-    for (auto &i : listBelian) {
-        totalHarga += (i.jumlah * (i.harga - (float(i.harga) * i.diskon)));
-        printTeks(i.nama, formatRupiah(i.harga));
-        if (i.diskon > 0) {
-            string diskon = to_string(i.diskon);
-            printTeksHarga(to_string(i.jumlah) + " x", " " + diskon.substr(0, diskon.find(".") + 3) + "% OFF ", formatRupiah(i.jumlah * (i.harga - (i.harga * i.diskon))));
+    for (int i = 0; i < listBelian.size(); i++) {
+        auto it = find_if(listBarang.begin(), listBarang.end(), [this, i](const Item &item) { return item.id == listBelian.at(i).id; });
+        unsigned int jlhBrg = listBelian.at(i).jumlah;
+        if (it != listBarang.end()) {
+            totalHarga += (jlhBrg * (it->harga - (float(it->harga) * it->diskon)));
+            printTeks(it->nama, formatRupiah(it->harga), cetakFile);
+            if (it->diskon > 0) {
+                printTeksHarga(to_string(jlhBrg) + " x", " " + to_string((int)(it->diskon*100)) + "% OFF ", formatRupiah(jlhBrg * (it->harga - (it->harga * it->diskon))), cetakFile);
+            } else {
+                printTeksHarga(to_string(jlhBrg) + " x", ".", formatRupiah(jlhBrg * it->harga), cetakFile);
+            }
         } else {
-            printTeksHarga(to_string(i.jumlah) + " x", ".", formatRupiah(i.jumlah * i.harga));
+            listError.push_back("ERR (Invoice::printIsi): Item not found in inventory.");
         }
     }
 
-    fileCetakBon << "╠═══════════════════════════════════════════════════╣" << endl;
-    printTeks("TOTAL HARGA", formatRupiah(totalHarga));
-    printTeks("PAJAK", to_string(pajak) + "%");
-    fileCetakBon << "╠═══════════════════════════════════════════════════╣" << endl;
+    printBorder('b', cetakFile);
+    printTeks("TOTAL HARGA", formatRupiah(totalHarga), cetakFile);
+    printTeks("PAJAK", to_string(pajak) + "%", cetakFile);
+    printBorder('b', cetakFile);
     totalBayar = totalHarga + (totalHarga * pajak / 100);
-    printTeks("TOTAL BAYAR", formatRupiah(totalBayar));
+    printTeks("TOTAL BAYAR", formatRupiah(totalBayar), cetakFile);
 }
 
-void Invoice::cetakBon() {
+void Invoice::cetakBon(bool cetakFile = true) {
+    fileCetakBon.open(dirCetakan + namaFile + "_bon.txt");
     if (!fileCetakBon.is_open()) {
         listError.push_back("ERR (Invoice::cetakBon): Failed to open file.");
         return;
     }
 
-    printHeader();
-    printIsi();
-    printFooter();
+    printBorder('h', false);
+    printTeks(string(INFO "Cetak bon ke file: ") + dirCetakan + namaFile + "_bon.txt", false);
+    printBorder('f', false);
+
+    printHeader(cetakFile);
+    printIsi(cetakFile);
+    printFooter(cetakFile);
+    fileCetakBon.close();
 }
+
+Belian Invoice::printTambahBelian() {
+    string choice;
+    Belian belian;
+    string tempTeks;
+
+    while (true) {
+        cout << endl;
+        printBorder('h', false);
+        printTeks("TAMBAH BARANG", false);
+        printTeks("Masukkan 'x' untuk keluar dari program Invoice.", false);
+        printTeks("Masukkan ID barang yang ingin ditambahkan.", false);
+        printBorder('b', false);
+        printTeksTanya("ID Barang: ");
+        getline(cin, choice);
+
+        if (choice == "x" || choice == "X") {
+            printBorder('b', false);
+            printTeks("Keluar dari tambah Invoice.", false);
+            belian.jumlah = 0;
+            belian.id = -1;
+            break;
+        }
+
+        try {
+            belian.id = stoi(choice);
+        } catch (...) {
+            printTeks("ERR (Invoice::printTambahBelian): Invalid input.", false);
+            printBorder('f', false);
+            continue;
+        }
+
+        auto it = find_if(listBarang.begin(), listBarang.end(), [belian](const Item &item) { return item.id == belian.id; });
+        if (it == listBarang.end()) {
+            printTeks("ERR (Invoice::printTambahBelian): Item not found.", false);
+            printBorder('f', false);
+            continue;
+        }
+        belian.id = it->id;
+        choice.clear();
+        tempTeks = "Jumlah barang (tersedia: " + to_string(it->jumlah) + "): ";
+        printTeksTanya(tempTeks);
+        getline(cin, choice);
+
+        if (choice == "x" || choice == "X") {
+            printBorder('b', false);
+            printTeks("Keluar dari tambah Invoice.", false);
+            belian.jumlah = 0;
+            belian.id = -1;
+            return belian;
+        }
+
+        try {
+            belian.jumlah = stoi(choice);
+        } catch (...) {
+            printTeks("ERR (Invoice::printTambahBelian): Invalid input.",false);
+            printBorder('f', false);
+            continue;
+        }
+
+        if (belian.jumlah > it->jumlah) {
+            printBorder('b', false);
+            printTeks("WARN: Jumlah barang melebihi stok.", false);
+            tempTeks = INFO "Barang yang dimasukkan ke Invoice adalah: " + to_string(it->jumlah);
+            printTeks(tempTeks, false);
+            printBorder('b', false);
+            belian.jumlah = it->jumlah;
+        }
+        if (belian.jumlah == 0) {
+            printTeks("ERR (Invoice::printTambahBelian): Jumlah barang tidak boleh 0.", false);
+            printTeks("Barang yang dimasukkan ke Invoice adalah: 1", false);
+            printBorder('b', false);
+            belian.jumlah = 1;
+        }
+
+        printBorder('b', false);
+        printTeks("Barang ditambahkan ke invoice.", false);
+        printBorder('f', false);
+        return belian;
+    }
+    printBorder('f', false);
+    return belian;
+}
+
+
+int Invoice::mulaiBeli() {
+    while (true) {
+        Belian belian = printTambahBelian();
+        if (belian.id == -1) {
+            return -1;
+        }
+
+        if (belian.jumlah == 0) {
+            printBorder('h', false);
+            printTeks("Jumlah tidak valid.", false);
+            printBorder('f', false);
+            continue;
+        }
+
+        tambahBelian(belian);
+    }
+    return 0;
+}
+
+void Invoice::displaySementara() {
+    int totalHarga = 0, jlh;
+
+    printBorder('h', false);
+    printTeks("INVOICE SEMENTARA", false);
+    printBorder('b', false);
+    printIsi(false);
+    printBorder('f', false);
+}
+
+
 
 void Invoice::setListBarang(vector<Item> barangs) { listBarang = barangs; }
 void Invoice::setNamaToko(string str) { namaToko = str; strUpper(namaToko); }
@@ -167,4 +337,3 @@ void Invoice::setAlamatToko(string str) { alamatToko = str; }
 void Invoice::setNoTelpToko(string str) { noTelpToko = str; }
 void Invoice::setNamaKasir(string str) { namaKasir = str; }
 int Invoice::getTotalBayar() { return totalBayar; }
-void Invoice::debug() { /* implementasi debug jika perlu */ }

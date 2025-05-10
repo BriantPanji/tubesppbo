@@ -17,22 +17,26 @@ private:
     string dirCetakan = "barang/";
     ofstream fileCetakBarang;
     ifstream fileBarang;
+
+    
+    public:
+    Inventory();
+    ~Inventory();
+    
     void loadFileBarang();
     void saveFileBarang();
 
-public:
-    Inventory();
-    ~Inventory();
-
     void tambahBarang(ItemNoId);
     void tambahBarang(string, unsigned int, unsigned int, float);
-    void hapusBarang(int);
-    void hapusBarang();
+    bool hapusBarang(int);
+    // void hapusBarang();
     void editBarang(int, ItemNoId);
     void editBarang(int, string, unsigned int, unsigned int, float);
-    void editBarang();
+    // void editBarang();
     void cetakListBarang();
+    void cetakListBarang(vector<Item>);
+    void cetakListDiskon(vector<Item>);
     void tampilkanBarang(int);
-    void tampilkanBarang();
-    vector<Item> getListBarang() { return listBarang; }
+    // void tampilkanBarang();
+    vector<Item> getListBarang() { loadFileBarang(); return listBarang; }
 };

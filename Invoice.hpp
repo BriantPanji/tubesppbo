@@ -8,6 +8,11 @@
 #include <sstream>
 #include <filesystem>
 
+struct Belian {
+    int id;
+    unsigned int jumlah;
+};
+
 class Invoice : public PanKasir {
 private:
     const std::string dirCetakan = "bon/";
@@ -16,19 +21,31 @@ private:
 
     std::ofstream fileCetakBon;
     std::string namaFile;
-    std::vector<ItemNoId> listBelian;
-
+    std::vector<Belian> listBelian;
+    std::vector<Item> listBarang;
+    
     std::tm *ltm;
     std::string bulanNow;
-
+    
     std::string getWaktu();
     std::string randomId();
-    void printTeks(std::string);
-    void printTeks(std::string, std::string);
-    void printTeksHarga(std::string, std::string, std::string);
-    void printTeksSisi(std::string, char side = 'l');
-    void printHeader();
-    void printFooter();
+    
+protected:
+    void printBorder(char, bool);
+    void printTeksTanya(std::string);
+
+    void printTeks(std::string, bool);
+    void printTeks(std::string, std::string, bool);
+    void printTeksHarga(std::string, std::string, std::string, bool);
+    void printTeksSisi(std::string, char, bool);
+    void printHeader(bool);
+    void printFooter(bool);
+
+    Belian printTambahBelian();
+
+    vector<Belian> getListBelian() { return listBelian; }
+
+
 
 public:
     Invoice();
@@ -41,11 +58,16 @@ public:
     void setNoTelpToko(std::string str);
     void setNamaKasir(std::string str);
 
-    void tambahBarang(ItemNoId);
-    void tambahBarang(std::string, unsigned int, unsigned int, float);
-    void printIsi();
-    void cetakBon();
+    void tambahBelian(int, unsigned int);
+    void tambahBelian(Belian);
+    void editBelian(int, unsigned int);
+    void hapusBelian(int);
+
+    int mulaiBeli();
+    void displaySementara();
+    // void tambahBelian(std::string, unsigned int, unsigned int, float);
+    void printIsi(bool);
+    void cetakBon(bool);
 
     int getTotalBayar();
-    void debug();
 };
