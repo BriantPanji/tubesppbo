@@ -50,4 +50,4 @@ $ ./kasir
 
 atau
 
-***[Klik Disini](https://github.com/BriantPanji/tubesppbo/raw/refs/heads/release/tubesppbo.rar)** Jika link di atas tidak dapat dibuka*
+***[Klik Disini](https://github.com/BriantPanji/tubesppbo/blob/release/tubesppbo.rar)** Jika link di atas tidak dapat dibuka*
