@@ -29,11 +29,13 @@ Ada dua cara untuk melakukan ini:
     $ cp barang/brg_init.txt barang/barang.txt
     ```
     * Copy manual file `barang/brg_init.txt` dari *file explorer* menjadi `barang/barang.txt`
+
 ### Mengkompilasi file:
 Lakukan perintah:
 ```sh
 $ g++ -okasir PanKasir.cpp Inventory.cpp Invoice.cpp Kasir.cpp main.cpp 
 ```
+
 ### Menjalankan file:
 ```sh
 $ kasir
@@ -42,3 +44,10 @@ atau
 ```sh
 $ ./kasir
 ```
+
+### Download Source Code
+***[Klik Disini](https://github.com/BriantPanji/tubesppbo/raw/refs/heads/release/tubesppbo.rar)** untuk mendownload source code*
+
+atau
+
+***[Klik Disini](https://github.com/BriantPanji/tubesppbo/raw/refs/heads/release/tubesppbo.rar)** Jika link di atas tidak dapat dibuka*
