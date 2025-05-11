@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef PANKASIR_HPP
 #define PANKASIR_HPP
 

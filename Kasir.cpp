@@ -1,35 +1,22 @@
+// PROGRAM INI HANYA BISA DIJALANKAN DI WINDOWS
+// PROGRAM INI HANYA BISA DIJALANKAN DI TERMINAL WINDOWS: cmd / powershell
+
 #include <iostream>
+#include <iomanip>
+#include <limits>
+#include <algorithm>
 #include <windows.h>
-#include "Inventory.hpp"
-#include "Invoice.hpp"
+#include "Kasir.hpp"
 
 using namespace std;
 
+Kasir::Kasir() {
+    system("cls");
+    SetConsoleOutputCP(CP_UTF8);
+    setListBarang(Inventory::getListBarang());
+}
 
-class Kasir : public Inventory, public Invoice {
-    private:
-        void printHeader();
-        char getPilihan();
-    
-    public:
-        Kasir() {
-            setListBarang(Inventory::getListBarang());
-        }
-        ~Kasir() { }
-        
-        void mainPage();
-
-        char beliLagi();
-
-        void tambahBarang();
-        void hapusBarang();
-        void editBarang();
-        void tampilkanBarang();
-        void tampilkanBarangDiskon();
-        void kurangiInventory(std::vector<Belian>);
-
-        
-};
+Kasir::~Kasir() {}
 
 void Kasir::tambahBarang() {
     string namaBrg, idStr;
@@ -143,7 +130,6 @@ void Kasir::hapusBarang() {
         printBorder('f', false);
 
     }
-
 }
 
 void Kasir::editBarang() {
@@ -157,6 +143,19 @@ void Kasir::editBarang() {
     printTeksTanya("Masukkan ID barang: ");
     getline(cin, idStr);
     printBorder('f', false);
+    if (idStr == "x" || idStr == "X") {
+        printBorder('h', false);
+        printTeks("Batal mengedit barang.", false);
+        printBorder('f', false);
+        return;
+    }
+    if (idStr.empty()) {
+        printBorder('h', false);
+        printTeks(ERR "ID barang tidak valid. Harus diisi.", false);
+        printBorder('f', false);
+        system("cls");
+        return hapusBarang();
+    }
 
     int id = stoi(idStr);
 
@@ -237,7 +236,6 @@ void Kasir::editBarang() {
     printBorder('h', false);
     printTeks("Barang selesai di-Edit!", false);
     printBorder('f', false);
-    
 }
 
 void Kasir::tampilkanBarang() {
@@ -290,7 +288,7 @@ char Kasir::getPilihan() {
     char pilihan;
     printTeksTanya("Pilih menu (0-6): ");
     pilihan = cin.get();
-    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear the input buffer
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear input buffer
     printBorder('f', false);
     if (pilihan < '0' || pilihan > '6') {
         printBorder('h', false);
@@ -304,7 +302,7 @@ char Kasir::getPilihan() {
 
 char Kasir::beliLagi() {
     char pilihan;
-    
+
     printBorder('h', false);
     printTeks("1. Tambah Produk ke Invoice", " ", false);
     printTeks("2. Selesai dan Cetak Invoice", " ", false);
@@ -313,7 +311,7 @@ char Kasir::beliLagi() {
     printTeksTanya("Pilihan: ");
     
     pilihan = cin.get();
-    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear the input buffer
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     pilihan = tolower(pilihan);
     printBorder('b', false);
     switch (pilihan) {
@@ -349,13 +347,7 @@ void Kasir::kurangiInventory(vector<Belian> listBeli) {
     setListBarang(Inventory::listBarang);
 }
 
-
-
-
-
-
 void Kasir::mainPage() {
-    
     printHeader();
     char beliLagi;
     char pilihan = getPilihan();
@@ -369,7 +361,6 @@ void Kasir::mainPage() {
                 printTeks("Program Kasir Selesai", false);
                 printTeks("Terima kasih!", false);
                 printBorder('f', false);
-
                 return;
             case '1':
                 do {
@@ -380,6 +371,7 @@ void Kasir::mainPage() {
                 if (beliLagi == '2') {
                     cetakBon(true);
                     kurangiInventory(getListBelian());
+                    hapusListBelian();
                     saveFileBarang();
                 }
                 break;
@@ -417,18 +409,4 @@ void Kasir::mainPage() {
         printHeader();
         pilihan = getPilihan();
     }
-}
-
-
-
-
-
-int main() {
-    SetConsoleOutputCP(CP_UTF8);
-
-    Kasir kasir;
-
-    system("cls");
-    kasir.mainPage();
-    return 0;
 }

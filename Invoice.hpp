@@ -1,7 +1,10 @@
 // Invoice.hpp
 #pragma once
+
+#ifndef INVOICE_HPP
+#define INVOICE_HPP
+
 #include "PanKasir.hpp"
-#include "Inventory.hpp"
 #include <fstream>
 #include <iomanip>
 #include <ctime>
@@ -44,6 +47,7 @@ protected:
     Belian printTambahBelian();
 
     vector<Belian> getListBelian() { return listBelian; }
+    void hapusListBelian();
 
 
 
@@ -71,3 +75,5 @@ public:
 
     int getTotalBayar();
 };
+
+#endif

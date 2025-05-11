@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef INVENTORY_HPP
+#define INVENTORY_HPP
+
 #include "PanKasir.hpp"
 #include <iostream>
 #include <fstream>
@@ -40,3 +43,5 @@ private:
     // void tampilkanBarang();
     vector<Item> getListBarang() { loadFileBarang(); return listBarang; }
 };
+
+#endif

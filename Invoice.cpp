@@ -213,6 +213,11 @@ void Invoice::cetakBon(bool cetakFile = true) {
     printIsi(cetakFile);
     printFooter(cetakFile);
     fileCetakBon.close();
+    namaFile = randomId();
+}
+
+void Invoice::hapusListBelian() {
+    listBelian.clear();
 }
 
 Belian Invoice::printTambahBelian() {
@@ -252,9 +257,18 @@ Belian Invoice::printTambahBelian() {
             printBorder('f', false);
             continue;
         }
+        auto ite = find_if(listBelian.begin(), listBelian.end(), [it](Belian &beli) { return beli.id == it->id; });
+        bool itemDiInvoice = ite != listBelian.end();
+        if ((it->jumlah < 1) || (itemDiInvoice && (it->jumlah - ite->jumlah < 1))) {
+            printTeks("ERR: Item tidak cukup.", false);
+            printBorder('f', false);
+            continue;
+        }
         belian.id = it->id;
         choice.clear();
-        tempTeks = "Jumlah barang (tersedia: " + to_string(it->jumlah) + "): ";
+        tempTeks = "Jumlah barang (tersedia: "+ to_string(it->jumlah);
+        if (itemDiInvoice) tempTeks += "-" + to_string(ite->jumlah);
+        tempTeks += "): ";
         printTeksTanya(tempTeks);
         getline(cin, choice);
 
@@ -319,6 +333,7 @@ int Invoice::mulaiBeli() {
 }
 
 void Invoice::displaySementara() {
+    // if (listBelian.empty()) return;
     int totalHarga = 0, jlh;
 
     printBorder('h', false);
